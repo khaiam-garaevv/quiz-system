@@ -26,14 +26,8 @@ export default function QuizApp() {
   const [view, setView] = useState<'home' | 'quiz' | 'result'>('home');
   const [selectedOpt, setSelectedOpt] = useState<string | null>(null);
 
-  useEffect(() => {
-    const id = getAnonId();
-    fetchData(id);
-  }, []);
-
   async function fetchData(id: string) {
     setLoading(true);
-    // Bütün məlumatları eyni anda çəkirik
     const [t, q, a] = await Promise.all([
       supabase.from('themes').select('*').order('sort_order'),
       supabase.from('questions').select('*'),
