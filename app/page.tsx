@@ -1,6 +1,8 @@
 'use client';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function QuizApp() {
   const [themes, setThemes] = useState<any[]>([]);
@@ -62,155 +64,94 @@ export default function QuizApp() {
         100% { transform: scale(1) rotate(0deg); opacity: 1; }
       }
       .stamp { animation: stampIn 0.4s cubic-bezier(.2,.9,.3,1); }
-      @media (prefers-reduced-motion: reduce) {
-        .stamp { animation: none !important; }
-      }
     `}</style>
   );
-
-  if (view === 'home') {
-    return (
-      <main className="min-h-screen" style={{ background: '#EDEFF4' }}>
-        <Fonts />
-        <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
-          <div className="mb-14">
-            <p className="font-mono-ui text-xs uppercase mb-4" style={{ color: '#5B6178' }}>
-              {String(themes.length).padStart(2, '0')} bölmə &middot; test toplusu
-            </p>
-            <h1 className="font-display text-4xl md:text-5xl" style={{ color: '#21263B' }}>
-              Testlər
-            </h1>
-            <div className="mt-5 h-[3px] w-16" style={{ background: '#B3261E' }} />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {themes.map((t, i) => (
-              <button
-                key={t.id}
-                onClick={() => startQuiz(t.id)}
-                className="group flex items-stretch bg-white border overflow-hidden text-left transition-all duration-300 hover:shadow-[0_8px_24px_-12px_rgba(33,38,59,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                style={{ borderColor: '#D7DBE4' }}
-              >
-                <div
-                  className="flex items-center justify-center w-14 shrink-0 font-mono-ui text-sm transition-colors duration-300"
-                  style={{ background: '#21263B', color: '#EDEFF4' }}
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </div>
-                <div className="flex-1 px-5 py-5 flex items-center justify-between gap-4">
-                  <span className="font-display text-base md:text-lg leading-snug" style={{ color: '#21263B' }}>
-                    {t.name}
-                  </span>
-                  <span
-                    className="font-mono-ui text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 shrink-0"
-                    style={{ color: '#B3261E' }}
-                  >
-                    →
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  const q = activeQs[currentIdx];
-  if (view !== 'home' && !q) return null;
 
   return (
     <main className="min-h-screen" style={{ background: '#EDEFF4' }}>
       <Fonts />
-      <div className="max-w-2xl mx-auto px-6 py-14 md:py-20">
-        {view === 'quiz' ? (
+      <div className="max-w-2xl mx-auto px-6 py-14">
+        
+        {view === 'home' ? (
           <div>
-            {/* Təkmilləşdirilmiş Header */}
+            <div className="mb-14">
+              <p className="font-mono-ui text-xs uppercase mb-4 text-[#5B6178]">
+                {String(themes.length).padStart(2, '0')} bölmə &middot; test toplusu
+              </p>
+              <h1 className="font-display text-4xl text-[#21263B]">Testlər</h1>
+              <div className="mt-5 h-[3px] w-16 bg-[#B3261E]" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {themes.map((t, i) => (
+                <Button
+                  key={t.id}
+                  variant="outline"
+                  onClick={() => startQuiz(t.id)}
+                  className="h-auto p-0 border-[#D7DBE4] hover:border-[#21263B] transition-all justify-start"
+                >
+                  <div className="flex w-full items-center">
+                    <div className="w-14 py-5 font-mono-ui text-sm bg-[#21263B] text-[#EDEFF4]">
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                    <span className="flex-1 px-5 font-display text-lg text-[#21263B] text-left">
+                      {t.name}
+                    </span>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : view === 'quiz' ? (
+          <div>
             <div className="flex items-center justify-between mb-8">
-              <span className="font-mono-ui text-xs uppercase" style={{ color: '#5B6178' }}>
+              <span className="font-mono-ui text-xs uppercase text-[#5B6178]">
                 Sual {currentIdx + 1} / {activeQs.length}
               </span>
-              <div className="flex items-center gap-3 font-mono-ui text-[10px] uppercase font-bold">
-                <span className="px-3 py-1 rounded-full bg-[#E8F5E9]" style={{ color: '#276749' }}>
-                  Düzgün: {score}
-                </span>
-                <span className="px-3 py-1 rounded-full bg-[#FFEBEE]" style={{ color: '#B3261E' }}>
-                  Səhv: {wrongCount}
-                </span>
+              <div className="flex gap-2">
+                <span className="text-[#276749] text-xs font-bold">✓ {score}</span>
+                <span className="text-[#B3261E] text-xs font-bold">✗ {wrongCount}</span>
               </div>
             </div>
 
-            <div className="h-[3px] w-full mb-10 overflow-hidden" style={{ background: '#D7DBE4' }}>
-              <div
-                className="h-full transition-all duration-500 ease-out"
-                style={{ width: `${(currentIdx / (activeQs.length || 1)) * 100}%`, background: '#21263B' }}
-              />
-            </div>
-
-            <div className="relative bg-white border p-8 md:p-10 mb-8" style={{ borderColor: '#D7DBE4' }}>
-              <h2 className="font-display text-xl md:text-2xl leading-relaxed relative" style={{ color: '#21263B' }}>
-                {q.question}
-              </h2>
-            </div>
+            <Card className="mb-8 border-[#D7DBE4] shadow-none">
+              <CardContent className="p-8">
+                <h2 className="font-display text-2xl text-[#21263B]">
+                  {activeQs[currentIdx].question}
+                </h2>
+              </CardContent>
+            </Card>
 
             <div className="space-y-3">
-              {['a', 'b', 'c'].map(opt => {
-                let optState = 'default';
-                if (selectedOpt) {
-                  if (opt === q.correct_option) optState = 'correct';
-                  else if (opt === selectedOpt) optState = 'wrong';
-                  else optState = 'muted';
-                }
-
-                const ringColor = optState === 'correct' ? '#276749' : optState === 'wrong' ? '#B3261E' : '#D7DBE4';
-
-                return (
-                  <button
-                    key={opt}
-                    onClick={() => checkAnswer(opt)}
-                    disabled={!!selectedOpt}
-                    className={`w-full flex items-center gap-4 p-4 bg-white border text-left transition-all duration-300 ${
-                      optState === 'default' ? 'hover:border-[#21263B]' : ''
-                    } ${optState === 'muted' ? 'opacity-40' : ''}`}
-                    style={{ borderColor: ringColor }}
-                  >
-                    <span
-                      className={`flex items-center justify-center w-9 h-9 rounded-full border-2 font-mono-ui text-sm shrink-0 ${
-                        optState === 'correct' || optState === 'wrong' ? 'stamp' : ''
-                      }`}
-                      style={{
-                        borderColor: ringColor,
-                        background: optState === 'correct' ? '#276749' : optState === 'wrong' ? '#B3261E' : 'transparent',
-                        color: optState === 'correct' || optState === 'wrong' ? '#fff' : '#5B6178',
-                      }}
-                    >
-                      {optState === 'correct' ? '✓' : optState === 'wrong' ? '✗' : opt.toUpperCase()}
-                    </span>
-                    <span style={{ color: '#21263B' }}>{q[`option_${opt}`]}</span>
-                  </button>
-                );
-              })}
+              {['a', 'b', 'c'].map(opt => (
+                <Button
+                  key={opt}
+                  variant="outline"
+                  disabled={!!selectedOpt}
+                  onClick={() => checkAnswer(opt)}
+                  className={`w-full h-auto p-4 justify-start gap-4 border-[#D7DBE4] ${
+                    selectedOpt === opt ? (opt === activeQs[currentIdx].correct_option ? 'border-[#276749]' : 'border-[#B3261E]') : ''
+                  }`}
+                >
+                  <span className={`w-9 h-9 flex items-center justify-center rounded-full border-2 ${
+                    selectedOpt === opt ? 'bg-[#21263B] text-white' : 'border-[#D7DBE4]'
+                  }`}>
+                    {opt.toUpperCase()}
+                  </span>
+                  <span className="text-[#21263B]">{activeQs[currentIdx][`option_${opt}`]}</span>
+                </Button>
+              ))}
             </div>
           </div>
         ) : (
           <div className="text-center py-12">
-            <div
-              className="stamp inline-flex flex-col items-center justify-center w-44 h-44 md:w-52 md:h-52 rounded-full border-4 mb-10"
-              style={{
-                borderColor: score / (activeQs.length || 1) >= 0.6 ? '#276749' : '#B3261E',
-                transform: 'rotate(-4deg)',
-              }}
-            >
-              <span className="font-mono-ui text-xs uppercase mb-2" style={{ color: '#5B6178' }}>Nəticə</span>
-              <span className="font-display text-4xl md:text-5xl" style={{ color: '#21263B' }}>{score}/{activeQs.length}</span>
+            <div className="stamp inline-flex flex-col items-center justify-center w-52 h-52 rounded-full border-4 mb-10" style={{ borderColor: score / (activeQs.length || 1) >= 0.6 ? '#276749' : '#B3261E' }}>
+              <span className="font-mono-ui text-xs uppercase text-[#5B6178]">Nəticə</span>
+              <span className="font-display text-5xl text-[#21263B]">{score}/{activeQs.length}</span>
             </div>
-            <button
-              onClick={() => setView('home')}
-              className="font-mono-ui text-sm px-8 py-3 transition-all duration-300 hover:opacity-90"
-              style={{ background: '#21263B', color: '#EDEFF4' }}
-            >
+            <Button onClick={() => setView('home')} className="bg-[#21263B] text-white px-8">
               ANA SƏHİFƏ
-            </button>
+            </Button>
           </div>
         )}
       </div>
