@@ -1,9 +1,7 @@
 'use client';
 import { supabase } from '@/lib/supabase';
-import { getAnonId } from '@/lib/anonId';
 import { useState, useEffect } from 'react';
 
-// Skeleton komponenti (Daha müasir görünüş üçün)
 const Skeleton = () => (
   <div className="space-y-4 animate-pulse">
     <div className="h-12 bg-zinc-100 rounded-lg"></div>
@@ -30,7 +28,6 @@ export default function QuizApp() {
 
   useEffect(() => {
     const id = getAnonId();
-    setAnonId(id);
     fetchData(id);
   }, []);
 
@@ -77,7 +74,6 @@ export default function QuizApp() {
                     {themes.map(t => (
                       <button
                         key={t.id}
-                        onClick={() => startQuiz(t.id)}
                         className="w-full p-4 bg-white border border-zinc-200 rounded-2xl hover:border-indigo-300 hover:shadow-md transition-all text-left font-medium"
                       >
                         {t.name}
