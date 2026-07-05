@@ -125,13 +125,18 @@ export default function QuizApp() {
       <div className="max-w-2xl mx-auto px-6 py-14 md:py-20">
         {view === 'quiz' ? (
           <div>
-            <div className="flex items-center justify-between mb-3 font-mono-ui text-xs" style={{ color: '#5B6178' }}>
-              <span>
-                SUAL {String(currentIdx + 1).padStart(2, '0')} / {String(activeQs.length).padStart(2, '0')}
+            {/* Təkmilləşdirilmiş Header */}
+            <div className="flex items-center justify-between mb-8">
+              <span className="font-mono-ui text-xs uppercase" style={{ color: '#5B6178' }}>
+                Sual {currentIdx + 1} / {activeQs.length}
               </span>
-              <div className="flex items-center gap-5">
-                <span style={{ color: '#276749' }}>✓ Düzgün {score}</span>
-                <span style={{ color: '#B3261E' }}>✗ Səhv {wrongCount}</span>
+              <div className="flex items-center gap-3 font-mono-ui text-[10px] uppercase font-bold">
+                <span className="px-3 py-1 rounded-full bg-[#E8F5E9]" style={{ color: '#276749' }}>
+                  Düzgün: {score}
+                </span>
+                <span className="px-3 py-1 rounded-full bg-[#FFEBEE]" style={{ color: '#B3261E' }}>
+                  Səhv: {wrongCount}
+                </span>
               </div>
             </div>
 
@@ -143,17 +148,7 @@ export default function QuizApp() {
             </div>
 
             <div className="relative bg-white border p-8 md:p-10 mb-8" style={{ borderColor: '#D7DBE4' }}>
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.04]"
-                style={{
-                  backgroundImage:
-                    'repeating-linear-gradient(to bottom, #21263B 0, #21263B 1px, transparent 1px, transparent 28px)',
-                }}
-              />
-              <h2
-                className="font-display text-xl md:text-2xl leading-relaxed relative"
-                style={{ color: '#21263B' }}
-              >
+              <h2 className="font-display text-xl md:text-2xl leading-relaxed relative" style={{ color: '#21263B' }}>
                 {q.question}
               </h2>
             </div>
@@ -167,21 +162,20 @@ export default function QuizApp() {
                   else optState = 'muted';
                 }
 
-                const ringColor =
-                  optState === 'correct' ? '#276749' : optState === 'wrong' ? '#B3261E' : '#D7DBE4';
+                const ringColor = optState === 'correct' ? '#276749' : optState === 'wrong' ? '#B3261E' : '#D7DBE4';
 
                 return (
                   <button
                     key={opt}
                     onClick={() => checkAnswer(opt)}
                     disabled={!!selectedOpt}
-                    className={`w-full flex items-center gap-4 p-4 bg-white border text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                    className={`w-full flex items-center gap-4 p-4 bg-white border text-left transition-all duration-300 ${
                       optState === 'default' ? 'hover:border-[#21263B]' : ''
                     } ${optState === 'muted' ? 'opacity-40' : ''}`}
                     style={{ borderColor: ringColor }}
                   >
                     <span
-                      className={`flex items-center justify-center w-9 h-9 rounded-full border-2 font-mono-ui text-sm shrink-0 transition-all duration-300 ${
+                      className={`flex items-center justify-center w-9 h-9 rounded-full border-2 font-mono-ui text-sm shrink-0 ${
                         optState === 'correct' || optState === 'wrong' ? 'stamp' : ''
                       }`}
                       style={{
@@ -207,22 +201,16 @@ export default function QuizApp() {
                 transform: 'rotate(-4deg)',
               }}
             >
-              <span className="font-mono-ui text-xs uppercase mb-2" style={{ color: '#5B6178' }}>
-                Nəticə
-              </span>
-              <span className="font-display text-4xl md:text-5xl" style={{ color: '#21263B' }}>
-                {score}/{activeQs.length}
-              </span>
+              <span className="font-mono-ui text-xs uppercase mb-2" style={{ color: '#5B6178' }}>Nəticə</span>
+              <span className="font-display text-4xl md:text-5xl" style={{ color: '#21263B' }}>{score}/{activeQs.length}</span>
             </div>
-            <div>
-              <button
-                onClick={() => setView('home')}
-                className="font-mono-ui text-sm px-8 py-3 transition-all duration-300 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                style={{ background: '#21263B', color: '#EDEFF4' }}
-              >
-                ANA SƏHİFƏ
-              </button>
-            </div>
+            <button
+              onClick={() => setView('home')}
+              className="font-mono-ui text-sm px-8 py-3 transition-all duration-300 hover:opacity-90"
+              style={{ background: '#21263B', color: '#EDEFF4' }}
+            >
+              ANA SƏHİFƏ
+            </button>
           </div>
         )}
       </div>
