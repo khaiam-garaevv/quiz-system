@@ -1,8 +1,6 @@
 'use client';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default function QuizApp() {
   const [themes, setThemes] = useState<any[]>([]);
@@ -11,7 +9,7 @@ export default function QuizApp() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
-  const [view, setView] = useState('home');
+  const [view, setView] = useState<'home' | 'quiz' | 'result'>('home');
   const [selectedOpt, setSelectedOpt] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,6 +28,7 @@ export default function QuizApp() {
     setCurrentIdx(0);
     setScore(0);
     setWrongCount(0);
+    setSelectedOpt(null);
     setView('quiz');
   };
 
@@ -50,111 +49,109 @@ export default function QuizApp() {
       } else {
         setView('result');
       }
-    }, 1000);
+    }, 700);
   };
 
-  const Fonts = () => (
-    <style jsx global>{`
-      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-      .font-display { font-family: 'Fraunces', serif; }
-      .font-mono-ui { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.03em; }
-      @keyframes stampIn {
-        0% { transform: scale(1.7) rotate(-10deg); opacity: 0; }
-        55% { transform: scale(0.92) rotate(3deg); opacity: 1; }
-        100% { transform: scale(1) rotate(0deg); opacity: 1; }
-      }
-      .stamp { animation: stampIn 0.4s cubic-bezier(.2,.9,.3,1); }
-    `}</style>
-  );
+  const restart = () => {
+    setView('home');
+    setSelectedOpt(null);
+  };
+
+  const progressPct = view === 'quiz' && activeQs.length
+    ? Math.round((currentIdx / activeQs.length) * 100)
+    : 0;
+
+  const q = activeQs[currentIdx];
 
   return (
-    <main className="min-h-screen" style={{ background: '#EDEFF4' }}>
-      <Fonts />
-      <div className="max-w-2xl mx-auto px-6 py-14">
-        
-        {view === 'home' ? (
-          <div>
-            <div className="mb-14">
-              <p className="font-mono-ui text-xs uppercase mb-4 text-[#5B6178]">
-                {String(themes.length).padStart(2, '0')} bölmə &middot; test toplusu
-              </p>
-              <h1 className="font-display text-4xl text-[#21263B]">Testlər</h1>
-              <div className="mt-5 h-[3px] w-16 bg-[#B3261E]" />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              {themes.map((t, i) => (
-                <Button
-                  key={t.id}
-                  variant="outline"
-                  onClick={() => startQuiz(t.id)}
-                  className="h-auto p-0 border-[#D7DBE4] hover:border-[#21263B] transition-all justify-start"
-                >
-                  <div className="flex w-full items-center">
-                    <div className="w-14 py-5 font-mono-ui text-sm bg-[#21263B] text-[#EDEFF4]">
-                      {String(i + 1).padStart(2, '0')}
-                    </div>
-                    <span className="flex-1 px-5 font-display text-lg text-[#21263B] text-left">
-                      {t.name}
-                    </span>
-                  </div>
-                </Button>
-              ))}
-            </div>
+    <div className="min-h-screen bg-white text-zinc-950 flex items-center justify-center p-6">
+      <div className="w-full max-w-md">
+        <div className="bg-white border border-zinc-200 rounded-2xl shadow-lg">
+          <div className="h-[3px] w-full bg-zinc-100">
+            <div
+              className="h-full bg-indigo-600 transition-all"
+              style={{ width: `${progressPct}%` }}
+            />
           </div>
-        ) : view === 'quiz' ? (
-          <div>
-            <div className="flex items-center justify-between mb-8">
-              <span className="font-mono-ui text-xs uppercase text-[#5B6178]">
-                Sual {currentIdx + 1} / {activeQs.length}
-              </span>
-              <div className="flex gap-2">
-                <span className="text-[#276749] text-xs font-bold">✓ {score}</span>
-                <span className="text-[#B3261E] text-xs font-bold">✗ {wrongCount}</span>
+
+          <div className="p-7">
+            {view === 'home' && (
+              <div>
+                <h1 className="text-xl font-bold mb-4">აირჩიეთ თემა</h1>
+                <div className="flex flex-col gap-2">
+                  {themes.length === 0 ? (
+                    <p className="text-zinc-500 text-sm">იტვირთება...</p>
+                  ) : (
+                    themes.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => startQuiz(t.id)}
+                        className="p-4 border rounded-lg text-left hover:bg-zinc-50"
+                      >
+                        {t.name}
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
-            <Card className="mb-8 border-[#D7DBE4] shadow-none">
-              <CardContent className="p-8">
-                <h2 className="font-display text-2xl text-[#21263B]">
-                  {activeQs[currentIdx].question}
-                </h2>
-              </CardContent>
-            </Card>
+            {view === 'quiz' && q && (
+              <div>
+                <div className="flex justify-between mb-4 text-xs font-bold text-zinc-500">
+                  <span>კითხვა: {currentIdx + 1}/{activeQs.length}</span>
+                  <span className="text-indigo-600">სწორი: {score}</span>
+                </div>
 
-            <div className="space-y-3">
-              {['a', 'b', 'c'].map(opt => (
-                <Button
-                  key={opt}
-                  variant="outline"
-                  disabled={!!selectedOpt}
-                  onClick={() => checkAnswer(opt)}
-                  className={`w-full h-auto p-4 justify-start gap-4 border-[#D7DBE4] ${
-                    selectedOpt === opt ? (opt === activeQs[currentIdx].correct_option ? 'border-[#276749]' : 'border-[#B3261E]') : ''
-                  }`}
+                <div className="bg-zinc-50 p-6 rounded-xl text-center mb-4">
+                  <span className="text-lg font-bold">{q.question}</span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {(['a', 'b', 'c'] as const).map(opt => {
+                    const isSelected = selectedOpt === opt;
+                    const isCorrectOpt = opt === q.correct_option;
+                    let extraClass = '';
+                    if (selectedOpt) {
+                      if (isCorrectOpt) extraClass = 'border-emerald-600 bg-emerald-50';
+                      else if (isSelected) extraClass = 'border-red-600 bg-red-50';
+                    }
+                    return (
+                      <button
+                        key={opt}
+                        disabled={!!selectedOpt}
+                        onClick={() => checkAnswer(opt)}
+                        className={`p-3 border rounded-lg text-left hover:bg-zinc-100 ${extraClass}`}
+                      >
+                        {q[`option_${opt}`]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {view === 'result' && (
+              <div className="text-center">
+                <h1 className="text-xl font-bold mb-2">შედეგი</h1>
+                <p className="mb-4">
+                  თქვენ {activeQs.length}-დან <b>{score}</b> სწორად უპასუხეთ.
+                </p>
+                <div className="text-left mb-4 text-sm text-zinc-500">
+                  <p>სწორი პასუხები: {score}</p>
+                  <p>არასწორი პასუხები: {wrongCount}</p>
+                </div>
+                <button
+                  onClick={restart}
+                  className="w-full py-3 bg-zinc-900 text-white rounded-lg"
                 >
-                  <span className={`w-9 h-9 flex items-center justify-center rounded-full border-2 ${
-                    selectedOpt === opt ? 'bg-[#21263B] text-white' : 'border-[#D7DBE4]'
-                  }`}>
-                    {opt.toUpperCase()}
-                  </span>
-                  <span className="text-[#21263B]">{activeQs[currentIdx][`option_${opt}`]}</span>
-                </Button>
-              ))}
-            </div>
+                  თავიდან დაწყება
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="stamp inline-flex flex-col items-center justify-center w-52 h-52 rounded-full border-4 mb-10" style={{ borderColor: score / (activeQs.length || 1) >= 0.6 ? '#276749' : '#B3261E' }}>
-              <span className="font-mono-ui text-xs uppercase text-[#5B6178]">Nəticə</span>
-              <span className="font-display text-5xl text-[#21263B]">{score}/{activeQs.length}</span>
-            </div>
-            <Button onClick={() => setView('home')} className="bg-[#21263B] text-white px-8">
-              ANA SƏHİFƏ
-            </Button>
-          </div>
-        )}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
